@@ -1,0 +1,98 @@
+[COMP1511 Extension Work]
+
+Write a summary of how you made the changes that you did:
+
+[E1:Summary] {{{
+I intended to save each pokemon data in a form much like the add pokemon command requires it, i.e ID NAME HEIGHT WEIGHT TYPE1 TYPE1. I figured using emtpy space to separate data was appropriate as none of the data is allowed to have an empty space in it. To save the data requires a single string to be passed to save_string. In order to do this I made use of strcpy and pointers. By setting dest of strcpy as a pointer pointing at the first null byte of a much larger string. All the data can be turned into what I am calling 'microstrings', each containing the string equivalent of their data. I convert doubles i.e height and weight using sprintf and printing to a string, sized assuming a massive double (relative to pokemon) of 123456.123456. Then they can be copied into a bigger 'macrostring' containing all the details of each pokemon in one line. To do this I made a function to find the next null byte of a charr array, and return a pointer to the byte after that. Setting the dest of strcpy to be the pointer, the strings can be copied together with minimal memory waste (i.e it would have been easier to just strcpy to the end of MAX_ACSII which is the size of each microstring but that would leave many useless null bytes in the save file. Above was replaced with the strcat function when I realised it existed, inserting a space between microstrings also using strcat seperated them. These strings can then undergo the same combination procedure to produce the 'megastring' with all of the data contained in one string. That can then be passed to save_string. The key parts are that the whitespace is consistent, 1 space between data types and 1 space between pokemon, index 0 of the string is NOT whitespace but the final index before null byte MUST BE WHITESPACE for the code to work. Loading was the reverse, making use of a while loop that increments according to a function that counts up to 6 whitespaces (the exact amount in 1 pokemon data set), keeping track of the actual array index also. Doing this means that the sscan that is used to get all of the pokemon data back by string scanning the megastring can be called at the start of each pokemon data set in the string. This effectivley divides it back into seperate data types. The ints for types are converted into type codes using the functions in pokemon_types.h and all of that is fed back into new_pokemon and then into add_pokemon. Luckily add_pokemon adds pokemon as found already. Finally the string pointed to by load_string is freed.
+}}}
+
+Write two tests to test your implementation of Extension 1 (Saving & Loading).
+
+[E1:Test 1] {{{
+a 1 Bulbasaur 0.7 6.9 poison grass
+a 2 Ivysaur 1.0 13.0 poison grass
+a 3 Venusaur 2.0 100.0 poison grass
+a 4 Charmander 0.6 8.5 fire none
+p
+f 0
+>
+f 0
+p
+c
+S hidden
+r
+r
+r
+r
+p
+L hidden
+p
+q
+}}}
+
+[E1:Test 2] {{{
+a 1 b^&*%d()%lf$int=#@!ulbasaur 6543217473773.123456 54767766321.12345 poison fairy
+a 2 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa 1 1 ice
+p
+S evil_test
+r
+L evil_test
+p
+d
+q
+
+}}}
+
+===========================================================================
+
+Write a summary of how you made the changes that you did:
+
+[E2:Summary] {{{
+In order to facilitate filtering the pokemon the struct pokedex was altered to inlcude a pointer to 'previous', modifying create_pokedex to match. This allowes pokedex nodes to be placed in a linked list. When any search filter is called a new pokedex is created and its "previous" pointer is pointed at the pokedex the function was called from. This is followed by a typical 'scan-through-list' while loop conditionally making use of the clone_pokemon function in pokemon.h and using the functions from stage 1-3 to create a new pokedex using the clones. Freeing them makes use of destroy_pokedex and returns a pointer to "previous" meaning you conceptually "remove" a layer of the linked list reverting to its pre search state. The search_pokemon function was more complex. it required a function I called string_in_string which increments through a string to search in, looking for a match with the first byte of the string to check for in order to do this efficiently I used strncasecmp comparing only 1 byte. If there is a match i.e strncasecmp == 0. A pointer to the current character of the string to search in is passed to another call of strncasecmp. This continues until a match is followed by a strncasecmp == 0, or not, in which case returns 1 or 0 respectivley.
+}}}
+
+Write two tests to test your implementation of Extension 2 (Sub-Lists).
+
+[E2:Test 1] {{{
+a 1 Bulbasaur 0.7 6.9 poison grass
+a 2 Ivysaur 1.0 13.0 poison grass
+a 3 Venusaur 2.0 100.0 poison grass
+a 4 Charmander 0.6 8.5 fire none
+a 5 Charmeleon 1.1 19.0 fire none
+a 6 Charizard 1.7 90.5 flying fire
+a 7 Squirtle 0.5 9.0 water none
+R BaSa
+p
+E
+R rtlea
+p
+E
+R Charizardo
+p
+E
+R 
+p
+E
+q
+}}}
+
+[E2:Test 2] {{{
+a 20 Raticate 0.7 18.5 normal none
+a 21 Spearow 0.3 2.0 flying normal
+a 22 Fearow 1.2 38.0 flying normal
+a 23 Ekans 2.0 6.9 poison none
+a 24 Arbok 3.5 65.0 poison none
+a 25 Pikachu 0.4 6.0 electric none
+a 26 Raichu 0.8 30.0 electric none
+a 27 Sandshrew 0.6 12.0 ground none
+a 28 Sandslash 1.0 29.5 ground none
+a 29 Nidoran-f 0.4 7.0 poison none
+a 30 Nidorina 0.8 20.0 poison none
+f 0
+>
+f 0
+>
+f 0
+p
+
+}}}

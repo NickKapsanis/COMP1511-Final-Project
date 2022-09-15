@@ -1,0 +1,21 @@
+a 1 "\0" 1 1 Ice
+a 1 test 1 1 Ice
+p
+S null
+r
+r
+p
+S null
+L null
+p
+a 1 Bulbasaur 0.7 6.9 poison grass
+a 2 Ivysaur 1.0 13.0 poison grass
+a 3 Venusaur 2.0 100.0 poison grass
+a 4 Charmander 0.6 8.5 fire none
+f 0
+>
+f 0
+p
+c
+q
+
